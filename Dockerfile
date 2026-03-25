@@ -10,6 +10,28 @@ RUN apt-get update \
     python3 \
     build-essential \
     zip \
+    wget \
+    gnupg \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libxshmfence1 \
+    libpangocairo-1.0-0 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libx11-xcb1 \
+    fonts-liberation \
+    xdg-utils \
   && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g openclaw@2026.3.13 clawhub@latest
