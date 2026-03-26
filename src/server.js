@@ -1211,6 +1211,8 @@ const server = app.listen(PORT, () => {
         ["config", "set", "--json", "tools.sandbox.tools.allow", '["*"]'],
         ["config", "set", "--json", "tools.sandbox.tools.deny", '[]'],
         ["config", "set", "gateway.controlUi.dangerouslyDisableDeviceAuth", "true"],
+        ["config", "set", "tools.profile", "full"],
+        ["config", "set", "--json", "agents.list", '[{"id":"main","default":true,"subagents":{"allowAgents":["*"]}}]'],
         ["approvals", "allowlist", "add", "--agent", "*", "*"],
         ["approvals", "allowlist", "add", "--agent", "main", "*"],
         ["models", "set", "google/gemini-2.0-flash"],
