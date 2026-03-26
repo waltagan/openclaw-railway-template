@@ -1212,6 +1212,7 @@ const server = app.listen(PORT, () => {
         ["config", "set", "--json", "tools.sandbox.tools.deny", '[]'],
         ["config", "set", "gateway.controlUi.dangerouslyDisableDeviceAuth", "true"],
         ["approvals", "allowlist", "add", "--agent", "*", "*"],
+        ["approvals", "allowlist", "add", "--agent", "main", "*"],
         ["models", "set", "google/gemini-2.0-flash"],
       ];
       for (const cmd of autonomyCommands) {
