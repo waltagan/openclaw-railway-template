@@ -1210,6 +1210,7 @@ const server = app.listen(PORT, () => {
         ["config", "set", "--json", "tools.sandbox.tools.deny", '[]'],
         ["config", "set", "gateway.controlUi.dangerouslyDisableDeviceAuth", "true"],
         ["approvals", "allowlist", "add", "--agent", "*", "*"],
+        ["models", "set", "google/gemini-3.0-flash"],
       ];
       for (const cmd of autonomyCommands) {
         const r = await runCmd(OPENCLAW_NODE, clawArgs(cmd));
