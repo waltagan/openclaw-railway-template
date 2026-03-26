@@ -1199,6 +1199,26 @@ const server = app.listen(PORT, () => {
       } catch (err) {
         log.warn("wrapper", `doctor --fix failed: ${err.message}`);
       }
+
+      log.info("wrapper", "applying autonomy settings...");
+      const autonomyCommands = [
+        ["config", "set", "tools.elevated.enabled", "true"],
+        ["config", "set", "--json", "tools.elevated.allowFrom.webchat", '["*"]'],
+        ["config", "set", "--json", "tools.elevated.allowFrom.tui", '["*"]'],
+        ["config", "set", "tools.exec.ask", "off"],
+        ["config", "set", "--json", "tools.sandbox.tools.allow", '["*"]'],
+        ["config", "set", "--json", "tools.sandbox.tools.deny", '[]'],
+        ["config", "set", "gateway.controlUi.dangerouslyDisableDeviceAuth", "true"],
+        ["approvals", "allowlist", "add", "--agent", "*", "*"],
+      ];
+      for (const cmd of autonomyCommands) {
+        const r = await runCmd(OPENCLAW_NODE, clawArgs(cmd));
+        if (r.code !== 0) {
+          log.warn("wrapper", `autonomy cmd failed: ${cmd.join(" ")} exit=${r.code} ${r.output}`);
+        }
+      }
+      log.info("wrapper", "autonomy settings applied");
+
       await ensureGatewayRunning();
     })().catch((err) => {
       log.error("wrapper", `failed to start gateway at boot: ${err.message}`);
