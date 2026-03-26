@@ -34,7 +34,9 @@ RUN apt-get update \
     xdg-utils \
   && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g openclaw@2026.3.13 clawhub@latest
+RUN npm install -g openclaw@2026.3.13 clawhub@latest puppeteer
+
+RUN npx puppeteer browsers install chrome
 
 # Backward-compatibility shim for older OPENCLAW_ENTRY values.
 RUN mkdir -p /openclaw \
