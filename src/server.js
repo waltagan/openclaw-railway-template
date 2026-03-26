@@ -9,6 +9,8 @@ import httpProxy from "http-proxy";
 import pty from "node-pty";
 import { WebSocketServer } from "ws";
 
+process.env.TZ = process.env.TZ || "America/Sao_Paulo";
+
 const PORT = Number.parseInt(process.env.PORT ?? "8080", 10);
 const STATE_DIR =
   process.env.OPENCLAW_STATE_DIR?.trim() ||
@@ -1210,7 +1212,7 @@ const server = app.listen(PORT, () => {
         ["config", "set", "--json", "tools.sandbox.tools.deny", '[]'],
         ["config", "set", "gateway.controlUi.dangerouslyDisableDeviceAuth", "true"],
         ["approvals", "allowlist", "add", "--agent", "*", "*"],
-        ["models", "set", "google/gemini-2.5-flash"],
+        ["models", "set", "google/gemini-2.0-flash"],
       ];
       for (const cmd of autonomyCommands) {
         const r = await runCmd(OPENCLAW_NODE, clawArgs(cmd));
