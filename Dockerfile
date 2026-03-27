@@ -33,7 +33,8 @@ RUN apt-get update \
     fonts-liberation \
     xdg-utils \
   && apt-get install -y postgresql-client-15 \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && ln -sf /usr/bin/python3 /usr/bin/python
 
 RUN npm install -g openclaw@2026.3.13 clawhub@latest puppeteer
 

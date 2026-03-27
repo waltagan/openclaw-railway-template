@@ -1216,6 +1216,7 @@ const server = app.listen(PORT, () => {
         ["approvals", "allowlist", "add", "--agent", "*", "*"],
         ["approvals", "allowlist", "add", "--agent", "main", "*"],
         ["models", "set", "google/gemini-2.0-flash"],
+        ["models", "fallbacks", "add", "google/gemini-2.0-flash-lite", "google/gemini-1.5-flash"],
       ];
       for (const cmd of autonomyCommands) {
         const r = await runCmd(OPENCLAW_NODE, clawArgs(cmd));
