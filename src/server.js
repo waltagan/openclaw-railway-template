@@ -1217,9 +1217,9 @@ const server = app.listen(PORT, () => {
         ["config", "set", "tools.profile", "full"],
         ["config", "set", "--json", "agents.list", '[{"id":"main","default":true,"subagents":{"allowAgents":["*"]}}]'],
         ["config", "set", "--json", "approvals.exec", '{"enabled":false}'],
-        ["models", "set", "google/gemini-2.0-flash"],
-        ["models", "fallbacks", "add", "google/gemini-2.0-flash-lite"],
-        ["models", "fallbacks", "add", "google/gemini-1.5-flash"],
+        ["config", "set", "--json", "agents.defaults.models", '{"google/gemini-3-pro-preview":{},"google/gemini-2.5-flash":{}}'],
+        ["models", "set", "google/gemini-3-pro-preview"],
+        ["models", "fallbacks", "add", "google/gemini-2.5-flash"],
       ];
       for (const cmd of autonomyCommands) {
         const r = await runCmd(OPENCLAW_NODE, clawArgs(cmd));
