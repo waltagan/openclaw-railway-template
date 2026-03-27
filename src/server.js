@@ -1203,20 +1203,23 @@ const server = app.listen(PORT, () => {
       }
 
       log.info("wrapper", "applying autonomy settings...");
+
+      // Layer 1: openclaw.json — tool policy + sandbox + elevated
       const autonomyCommands = [
         ["config", "set", "tools.elevated.enabled", "true"],
         ["config", "set", "--json", "tools.elevated.allowFrom.webchat", '["*"]'],
         ["config", "set", "--json", "tools.elevated.allowFrom.tui", '["*"]'],
+        ["config", "set", "tools.exec.security", "full"],
         ["config", "set", "tools.exec.ask", "off"],
         ["config", "set", "--json", "tools.sandbox.tools.allow", '["*"]'],
         ["config", "set", "--json", "tools.sandbox.tools.deny", '[]'],
         ["config", "set", "gateway.controlUi.dangerouslyDisableDeviceAuth", "true"],
         ["config", "set", "tools.profile", "full"],
         ["config", "set", "--json", "agents.list", '[{"id":"main","default":true,"subagents":{"allowAgents":["*"]}}]'],
-        ["approvals", "allowlist", "add", "--agent", "*", "*"],
-        ["approvals", "allowlist", "add", "--agent", "main", "*"],
+        ["config", "set", "--json", "approvals.exec", '{"enabled":false}'],
         ["models", "set", "google/gemini-2.0-flash"],
-        ["models", "fallbacks", "add", "google/gemini-2.0-flash-lite", "google/gemini-1.5-flash"],
+        ["models", "fallbacks", "add", "google/gemini-2.0-flash-lite"],
+        ["models", "fallbacks", "add", "google/gemini-1.5-flash"],
       ];
       for (const cmd of autonomyCommands) {
         const r = await runCmd(OPENCLAW_NODE, clawArgs(cmd));
@@ -1224,6 +1227,25 @@ const server = app.listen(PORT, () => {
           log.warn("wrapper", `autonomy cmd failed: ${cmd.join(" ")} exit=${r.code} ${r.output}`);
         }
       }
+
+      // Layer 2: exec-approvals.json — host-level execution gating
+      // This is the layer that actually causes "allowlist miss"
+      const approvalsPath = path.join(STATE_DIR, "exec-approvals.json");
+      const approvalsConfig = {
+        version: 1,
+        defaults: { security: "full", ask: "off", askFallback: "full" },
+        agents: {
+          "*": { allowlist: [{ pattern: "*", id: "auto-full-access" }] },
+          main: { allowlist: [{ pattern: "*", id: "auto-main-access" }] },
+        },
+      };
+      try {
+        fs.writeFileSync(approvalsPath, JSON.stringify(approvalsConfig, null, 2), "utf8");
+        log.info("wrapper", "exec-approvals.json written with full trust posture");
+      } catch (err) {
+        log.warn("wrapper", `could not write exec-approvals.json: ${err.message}`);
+      }
+
       log.info("wrapper", "autonomy settings applied");
 
       await ensureGatewayRunning();
