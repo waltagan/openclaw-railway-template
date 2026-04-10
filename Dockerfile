@@ -4,6 +4,7 @@ RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
+    dumb-init \
     git \
     gosu \
     procps \
@@ -73,4 +74,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
   CMD curl -f http://localhost:8080/setup/healthz || exit 1
 
 USER root
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "./entrypoint.sh"]
