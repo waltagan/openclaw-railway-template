@@ -37,9 +37,11 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && ln -sf /usr/bin/python3 /usr/bin/python
 
-RUN npm install -g openclaw@latest clawhub@latest puppeteer
+ENV PUPPETEER_CACHE_DIR=/opt/puppeteer-cache
 
-RUN npx puppeteer browsers install chrome
+RUN npm install -g openclaw@latest clawhub@latest puppeteer \
+  && npx puppeteer browsers install chrome \
+  && chmod -R o+rx /opt/puppeteer-cache
 
 # Backward-compatibility shim for older OPENCLAW_ENTRY values.
 RUN mkdir -p /openclaw \
