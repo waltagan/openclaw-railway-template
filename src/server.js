@@ -1033,18 +1033,23 @@ function createTuiWebSocketServer(httpServer) {
       if (ptyProcess) return;
 
       log.info("tui", `spawning PTY with ${cols}x${rows}`);
-      ptyProcess = pty.spawn(OPENCLAW_NODE, clawArgs(["tui"]), {
-        name: "xterm-256color",
-        cols,
-        rows,
-        cwd: WORKSPACE_DIR,
-        env: {
-          ...process.env,
-          OPENCLAW_STATE_DIR: STATE_DIR,
-          OPENCLAW_WORKSPACE_DIR: WORKSPACE_DIR,
-          TERM: "xterm-256color",
+      ptyProcess = pty.spawn(
+        OPENCLAW_NODE,
+        clawArgs(["tui", "--token", OPENCLAW_GATEWAY_TOKEN]),
+        {
+          name: "xterm-256color",
+          cols,
+          rows,
+          cwd: WORKSPACE_DIR,
+          env: {
+            ...process.env,
+            OPENCLAW_STATE_DIR: STATE_DIR,
+            OPENCLAW_WORKSPACE_DIR: WORKSPACE_DIR,
+            OPENCLAW_GATEWAY_TOKEN,
+            TERM: "xterm-256color",
+          },
         },
-      });
+      );
 
       if (activeTuiSession) {
         activeTuiSession.pty = ptyProcess;
@@ -1246,25 +1251,28 @@ const server = app.listen(PORT, () => {
       }
 
       // Inject provider API keys from environment variables
-      // OpenClaw requires apiKey + baseUrl + models[] for config validation
+      // OpenClaw v2026.4.12 requires apiKey + baseUrl + models[{name}]
       const providerConfigs = [
         {
           env: "ANTHROPIC_API_KEY",
           cfgPath: "models.providers.anthropic",
           baseUrl: "https://api.anthropic.com",
-          models: ["claude-sonnet-4-6", "claude-opus-4-6"],
+          models: [{ name: "claude-sonnet-4-6" }, { name: "claude-opus-4-6" }],
         },
         {
           env: "OPENAI_API_KEY",
           cfgPath: "models.providers.openai",
           baseUrl: "https://api.openai.com/v1",
-          models: ["gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-4.1", "gpt-4.1-mini"],
+          models: [
+            { name: "gpt-5.4" }, { name: "gpt-5.4-mini" }, { name: "gpt-5.4-nano" },
+            { name: "gpt-4.1" }, { name: "gpt-4.1-mini" },
+          ],
         },
         {
           env: "GOOGLE_API_KEY",
           cfgPath: "models.providers.google",
           baseUrl: "https://generativelanguage.googleapis.com",
-          models: ["gemini-3-pro-preview", "gemini-2.5-flash"],
+          models: [{ name: "gemini-3-pro-preview" }, { name: "gemini-2.5-flash" }],
         },
       ];
       for (const { env, cfgPath, baseUrl, models } of providerConfigs) {

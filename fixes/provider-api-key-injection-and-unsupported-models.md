@@ -37,8 +37,34 @@ Configuracao completa por provider:
 - OpenAI: baseUrl `https://api.openai.com/v1`, models `["gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-4.1", "gpt-4.1-mini"]`
 - Google: baseUrl `https://generativelanguage.googleapis.com`, models `["gemini-3-pro-preview", "gemini-2.5-flash"]`
 
+### Solucao (iteracao 3 - v2026.4.12 schema refinado)
+O campo `models` exige array de **objetos** `{name: string}`, nao strings:
+```js
+// Errado: models: ["claude-sonnet-4-6"]
+// Certo:  models: [{ name: "claude-sonnet-4-6" }]
+```
+
 **Licao:** O schema de `models.providers.<name>` muda entre versoes do OpenClaw.
 Sempre validar os campos obrigatorios nos logs apos atualizar a versao.
+
+## Problema 3: TUI token_mismatch
+
+### Sintoma
+```
+[ws] unauthorized ... reason=token_mismatch
+gateway connect failed: GatewayClientRequestError: unauthorized: gateway token mismatch
+```
+
+### Causa raiz
+O Web TUI spawna `openclaw tui` via PTY sem passar o token do gateway.
+O `openclaw tui` tenta se conectar ao gateway usando o token do config file,
+que pode estar dessincronizado com o token real do gateway (especialmente
+apos `doctor --fix` na nova versao reescrever o config).
+
+### Solucao
+Passar o token explicitamente no spawn do TUI:
+1. `--token <TOKEN>` como argumento CLI
+2. `OPENCLAW_GATEWAY_TOKEN` como variavel de ambiente no env do PTY
 
 ## Problema 2: Modelos GPT-5.4 nao reconhecidos
 
