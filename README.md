@@ -9,7 +9,7 @@ O **OpenClaw** e um assistente pessoal de IA open-source que roda nos seus propr
 | Componente | Tecnologia |
 |-----------|------------|
 | **Hospedagem** | Railway (PaaS) |
-| **IA Provider** | Google (Gemini) |
+| **IA Providers** | Anthropic (Claude Sonnet 4.6, Opus 4.6), Google (Gemini 3 Pro, 2.5 Flash), OpenAI (GPT-4.1, 4.1-mini) |
 | **Canais** | WhatsApp + Web UI |
 | **IDE/Dev** | Cursor |
 | **Controle de versao** | GitHub |

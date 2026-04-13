@@ -1217,14 +1217,43 @@ const server = app.listen(PORT, () => {
         ["config", "set", "tools.profile", "full"],
         ["config", "set", "--json", "agents.list", '[{"id":"main","default":true,"subagents":{"allowAgents":["*"]}}]'],
         ["config", "set", "--json", "approvals.exec", '{"enabled":false}'],
-        ["config", "set", "--json", "agents.defaults.models", '{"google/gemini-3-pro-preview":{},"google/gemini-2.5-flash":{}}'],
-        ["models", "set", "google/gemini-3-pro-preview"],
+        ["config", "set", "--json", "agents.defaults.models", JSON.stringify({
+          "anthropic/claude-sonnet-4-6": {},
+          "anthropic/claude-opus-4-6": {},
+          "google/gemini-3-pro-preview": {},
+          "google/gemini-2.5-flash": {},
+          "openai/gpt-4.1": {},
+          "openai/gpt-4.1-mini": {},
+        })],
+        ["models", "set", "anthropic/claude-sonnet-4-6"],
+        ["models", "fallbacks", "add", "anthropic/claude-opus-4-6"],
+        ["models", "fallbacks", "add", "google/gemini-3-pro-preview"],
         ["models", "fallbacks", "add", "google/gemini-2.5-flash"],
+        ["models", "fallbacks", "add", "openai/gpt-4.1"],
+        ["models", "fallbacks", "add", "openai/gpt-4.1-mini"],
       ];
       for (const cmd of autonomyCommands) {
         const r = await runCmd(OPENCLAW_NODE, clawArgs(cmd));
         if (r.code !== 0) {
           log.warn("wrapper", `autonomy cmd failed: ${cmd.join(" ")} exit=${r.code} ${r.output}`);
+        }
+      }
+
+      // Inject provider API keys from environment variables
+      const providerKeys = [
+        { env: "ANTHROPIC_API_KEY", path: "models.providers.anthropic.apiKey" },
+        { env: "OPENAI_API_KEY", path: "models.providers.openai.apiKey" },
+        { env: "GOOGLE_API_KEY", path: "models.providers.google.apiKey" },
+      ];
+      for (const { env, path: cfgPath } of providerKeys) {
+        const key = process.env[env]?.trim();
+        if (key) {
+          const r = await runCmd(OPENCLAW_NODE, clawArgs(["config", "set", cfgPath, key]));
+          if (r.code !== 0) {
+            log.warn("wrapper", `failed to set ${cfgPath}: exit=${r.code} ${r.output}`);
+          } else {
+            log.info("wrapper", `${env} injected into config`);
+          }
         }
       }
 
