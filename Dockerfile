@@ -37,7 +37,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && ln -sf /usr/bin/python3 /usr/bin/python
 
-RUN npm install -g openclaw@2026.3.13 clawhub@latest puppeteer
+RUN npm install -g openclaw@latest clawhub@latest puppeteer
 
 RUN npx puppeteer browsers install chrome
 
