@@ -1222,17 +1222,11 @@ const server = app.listen(PORT, () => {
           "anthropic/claude-opus-4-6": {},
           "google/gemini-3-pro-preview": {},
           "google/gemini-2.5-flash": {},
-          "openai/gpt-5.4": {},
-          "openai/gpt-5.4-mini": {},
-          "openai/gpt-5.4-nano": {},
           "openai/gpt-4.1": {},
           "openai/gpt-4.1-mini": {},
         })],
         ["models", "set", "anthropic/claude-sonnet-4-6"],
         ["models", "fallbacks", "add", "anthropic/claude-opus-4-6"],
-        ["models", "fallbacks", "add", "openai/gpt-5.4"],
-        ["models", "fallbacks", "add", "openai/gpt-5.4-mini"],
-        ["models", "fallbacks", "add", "openai/gpt-5.4-nano"],
         ["models", "fallbacks", "add", "google/gemini-3-pro-preview"],
         ["models", "fallbacks", "add", "google/gemini-2.5-flash"],
         ["models", "fallbacks", "add", "openai/gpt-4.1"],
@@ -1246,15 +1240,17 @@ const server = app.listen(PORT, () => {
       }
 
       // Inject provider API keys from environment variables
-      const providerKeys = [
-        { env: "ANTHROPIC_API_KEY", path: "models.providers.anthropic.apiKey" },
-        { env: "OPENAI_API_KEY", path: "models.providers.openai.apiKey" },
-        { env: "GOOGLE_API_KEY", path: "models.providers.google.apiKey" },
+      // OpenClaw requires baseUrl alongside apiKey for config validation
+      const providerConfigs = [
+        { env: "ANTHROPIC_API_KEY", cfgPath: "models.providers.anthropic", baseUrl: "https://api.anthropic.com" },
+        { env: "OPENAI_API_KEY", cfgPath: "models.providers.openai", baseUrl: "https://api.openai.com/v1" },
+        { env: "GOOGLE_API_KEY", cfgPath: "models.providers.google", baseUrl: "https://generativelanguage.googleapis.com" },
       ];
-      for (const { env, path: cfgPath } of providerKeys) {
+      for (const { env, cfgPath, baseUrl } of providerConfigs) {
         const key = process.env[env]?.trim();
         if (key) {
-          const r = await runCmd(OPENCLAW_NODE, clawArgs(["config", "set", cfgPath, key]));
+          const providerJson = JSON.stringify({ apiKey: key, baseUrl });
+          const r = await runCmd(OPENCLAW_NODE, clawArgs(["config", "set", "--json", cfgPath, providerJson]));
           if (r.code !== 0) {
             log.warn("wrapper", `failed to set ${cfgPath}: exit=${r.code} ${r.output}`);
           } else {
