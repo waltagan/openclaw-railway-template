@@ -19,19 +19,26 @@ com `apiKey` ao configurar um provider. Usar `openclaw config set
 models.providers.anthropic.apiKey <key>` falha porque cria um objeto
 provider incompleto (sem baseUrl).
 
-### Solucao
+### Solucao (iteracao 1 - v2026.3.13)
 Trocar de `config set <path> <value>` (campo individual) para
-`config set --json <path> <json>` (objeto completo com apiKey + baseUrl):
+`config set --json <path> <json>` (objeto completo com apiKey + baseUrl).
+
+### Solucao (iteracao 2 - v2026.4.12)
+A versao v2026.4.12 adicionou campo obrigatorio `models` (array) ao schema.
+O objeto do provider agora precisa de apiKey + baseUrl + models:
 
 ```js
-const providerJson = JSON.stringify({ apiKey: key, baseUrl });
+const providerJson = JSON.stringify({ apiKey: key, baseUrl, models });
 await runCmd(OPENCLAW_NODE, clawArgs(["config", "set", "--json", cfgPath, providerJson]));
 ```
 
-URLs base por provider:
-- Anthropic: `https://api.anthropic.com`
-- OpenAI: `https://api.openai.com/v1`
-- Google: `https://generativelanguage.googleapis.com`
+Configuracao completa por provider:
+- Anthropic: baseUrl `https://api.anthropic.com`, models `["claude-sonnet-4-6", "claude-opus-4-6"]`
+- OpenAI: baseUrl `https://api.openai.com/v1`, models `["gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-4.1", "gpt-4.1-mini"]`
+- Google: baseUrl `https://generativelanguage.googleapis.com`, models `["gemini-3-pro-preview", "gemini-2.5-flash"]`
+
+**Licao:** O schema de `models.providers.<name>` muda entre versoes do OpenClaw.
+Sempre validar os campos obrigatorios nos logs apos atualizar a versao.
 
 ## Problema 2: Modelos GPT-5.4 nao reconhecidos
 
