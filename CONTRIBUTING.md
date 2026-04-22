@@ -176,7 +176,7 @@ Before submitting a PR, test:
 
 1. **Update documentation** if adding features:
    - README.md for user-facing features
-   - CLAUDE.md for technical implementation details
+   - AGENTS.md for technical implementation details
    - CONTRIBUTING.md for new development workflows
 
 2. **Test on Railway** (not just locally):
@@ -275,7 +275,7 @@ All contributions go through code review:
 
 - Open a GitHub Issue for general questions
 - Ask in Discord: https://discord.com/invite/clawd
-- Check existing docs: README.md, CLAUDE.md, MIGRATION.md
+- Check existing docs: README.md, AGENTS.md, MIGRATION.md
 
 ## License
 

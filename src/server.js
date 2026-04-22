@@ -21,6 +21,11 @@ const WORKSPACE_DIR =
 
 const SETUP_PASSWORD = process.env.SETUP_PASSWORD?.trim();
 
+/** Se "1" ou "true", loga a saida completa de `openclaw doctor --fix` no boot (muito ruido no Railway). */
+const LOG_DOCTOR_FULL =
+  process.env.WRAPPER_LOG_DOCTOR_FULL === "1" ||
+  process.env.WRAPPER_LOG_DOCTOR_FULL === "true";
+
 const LOG_FILE = path.join(STATE_DIR, "server.log");
 const LOG_RING_BUFFER_MAX = 1000;
 const MAX_LOG_FILE_SIZE = 5 * 1024 * 1024;
@@ -146,6 +151,80 @@ function isConfigured() {
   try {
     return fs.existsSync(configPath());
   } catch {
+    return false;
+  }
+}
+
+const STRIP_INCOMPATIBLE_MODEL_ID_PREFIX = "anthropic/";
+
+/**
+ * Remove entradas legadas do provider/IDs de modelos nao usados por este
+ * template a partir de volumes existentes. Idempotente.
+ * @returns {boolean} se openclaw.json foi alterado
+ */
+function tryStripIncompatibleModelEntriesFromConfigObject(cfg) {
+  if (!cfg || typeof cfg !== "object" || Array.isArray(cfg)) return false;
+  let changed = false;
+  if (cfg.models?.providers?.anthropic) {
+    delete cfg.models.providers.anthropic;
+    changed = true;
+  }
+  const adm = cfg.agents?.defaults?.models;
+  if (adm && typeof adm === "object" && !Array.isArray(adm)) {
+    for (const k of Object.keys(adm)) {
+      if (k.startsWith(STRIP_INCOMPATIBLE_MODEL_ID_PREFIX)) {
+        delete adm[k];
+        changed = true;
+      }
+    }
+  }
+  if (Array.isArray(cfg.models?.fallbacks)) {
+    const next = cfg.models.fallbacks.filter(
+      (x) => typeof x !== "string" || !x.startsWith(STRIP_INCOMPATIBLE_MODEL_ID_PREFIX),
+    );
+    if (next.length !== cfg.models.fallbacks.length) {
+      cfg.models.fallbacks = next;
+      changed = true;
+    }
+  }
+  const def = "google/gemini-2.5-flash";
+  const isStripped = (s) => typeof s === "string" && s.startsWith(STRIP_INCOMPATIBLE_MODEL_ID_PREFIX);
+  if (isStripped(cfg?.agents?.defaults?.model)) {
+    cfg.agents.defaults.model = def;
+    changed = true;
+  }
+  if (isStripped(cfg?.models?.default)) {
+    cfg.models.default = def;
+    changed = true;
+  }
+  if (isStripped(cfg?.models?.defaultModel)) {
+    cfg.models.defaultModel = def;
+    changed = true;
+  }
+  return changed;
+}
+
+function tryStripIncompatibleModelEntriesFromOpenclawFile() {
+  const p = configPath();
+  let raw;
+  try {
+    raw = fs.readFileSync(p, "utf8");
+  } catch {
+    return false;
+  }
+  let cfg;
+  try {
+    cfg = JSON.parse(raw);
+  } catch (err) {
+    log.warn("config", `openclaw.json invalido, ignorando higienizacao: ${err.message}`);
+    return false;
+  }
+  if (!tryStripIncompatibleModelEntriesFromConfigObject(cfg)) return false;
+  try {
+    fs.writeFileSync(p, JSON.stringify(cfg, null, 2), "utf8");
+    return true;
+  } catch (err) {
+    log.warn("config", `falha ao escrever openclaw.json apos higienizacao: ${err.message}`);
     return false;
   }
 }
@@ -1191,10 +1270,24 @@ const server = app.listen(PORT, () => {
       try {
         log.info("wrapper", "running openclaw doctor --fix...");
         const dr = await runCmd(OPENCLAW_NODE, clawArgs(["doctor", "--fix"]));
-        log.info("wrapper", `doctor --fix exit=${dr.code}`);
-        if (dr.output) log.info("wrapper", dr.output);
+        if (dr.code !== 0) {
+          log.warn("wrapper", `doctor --fix exit=${dr.code}`);
+          if (dr.output) log.warn("wrapper", dr.output);
+        } else {
+          log.info(
+            "wrapper",
+            "doctor --fix exit=0 (saida completa suprimida; WRAPPER_LOG_DOCTOR_FULL=1 para depurar)",
+          );
+          if (LOG_DOCTOR_FULL && dr.output) {
+            log.info("wrapper", dr.output);
+          }
+        }
       } catch (err) {
         log.warn("wrapper", `doctor --fix failed: ${err.message}`);
+      }
+
+      if (isConfigured() && tryStripIncompatibleModelEntriesFromOpenclawFile()) {
+        log.info("wrapper", "openclaw.json higienizado (entradas incompatíveis com este template removidas)");
       }
 
       log.info("wrapper", "applying autonomy settings...");

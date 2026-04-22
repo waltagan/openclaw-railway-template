@@ -9,7 +9,7 @@ O **OpenClaw** e um assistente pessoal de IA open-source que roda nos seus propr
 | Componente | Tecnologia |
 |-----------|------------|
 | **Hospedagem** | Railway (PaaS) |
-| **IA Providers** | **Modelo padrão:** Google Gemini 2.5 Flash; Google (Gemini 3 Pro, 2.5 Flash), OpenAI (GPT-5.4, 5.4-mini, 5.4-nano, 4.1, 4.1-mini) — sem Anthropic/Claude neste template |
+| **IA Providers** | **Modelo padrão:** Google Gemini 2.5 Flash; Google (Gemini 3 Pro, 2.5 Flash), OpenAI (GPT-5.4, 5.4-mini, 5.4-nano, 4.1, 4.1-mini) |
 | **Canais** | WhatsApp + Web UI |
 | **IDE/Dev** | Cursor |
 | **Controle de versao** | GitHub |
@@ -610,6 +610,12 @@ git pull origin main
 
 ## 14. Troubleshooting
 
+### Log: "systemd user services are unavailable" / bloco Gateway no `doctor`
+
+**O que e:** o `openclaw doctor` mostra um aviso generico de que nao ha systemd (normal em **Docker/Railway**). O template **ja** sobe o gateway em primeiro plano com `openclaw gateway run` (processo filho do wrapper) — nao e erro e nao exige instalar systemd.
+
+**Log ruidoso:** no boot, o wrapper nao repete mais a saida completa do `doctor --fix` no log quando tudo da certo. Para depurar, defina `WRAPPER_LOG_DOCTOR_FULL=1` nas variaveis do Railway.
+
 ### Problema: Deploy falha no Railway
 
 **Solucao:**
@@ -699,7 +705,7 @@ git pull origin main
 
 | Tecnologia | Versao/Detalhes |
 |-----------|-----------------|
-| **OpenClaw** | Latest (instalado via npm no Docker build) |
+| **OpenClaw** | Latest (instalado via npm no Docker build); no boot, o wrapper higieniza `openclaw.json` de entradas legadas incompatíveis com o template após `doctor --fix` |
 | **Node.js** | 22.16+ / 24 (recomendado) |
 | **Runtime** | Docker (Dockerfile) |
 | **Cloud** | Railway (PaaS) |

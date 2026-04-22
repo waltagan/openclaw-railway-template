@@ -300,7 +300,7 @@ If you need to rollback:
 - **Check diagnostics**: `/healthz` and `/setup/api/debug`
 - **Report issues**: <https://github.com/codetitlan/openclaw-railway-template/issues>
 - **Ask in Discord**: <https://discord.com/invite/clawd>
-- **Review docs**: README.md, CONTRIBUTING.md, CLAUDE.md
+- **Review docs**: README.md, CONTRIBUTING.md, AGENTS.md
 
 ## Success Stories
 

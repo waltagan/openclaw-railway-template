@@ -6,17 +6,17 @@
 
 ### Sintoma
 ```
-[WARN] failed to set models.providers.anthropic.apiKey: exit=1
-Error: Config validation failed: models.providers.anthropic.baseUrl:
+[WARN] failed to set models.providers.openai: exit=1
+Error: Config validation failed: models.providers.openai.baseUrl:
 Invalid input: expected string, received undefined
 ```
 
-Mesmo erro para `models.providers.openai.apiKey`.
+(Outros providers mostram o mesmo padrao: `baseUrl` ausente.)
 
 ### Causa raiz
-O schema de validacao do OpenClaw exige que `baseUrl` esteja presente junto
+O schema de validacao do Openclaw exige que `baseUrl` esteja presente junto
 com `apiKey` ao configurar um provider. Usar `openclaw config set
-models.providers.anthropic.apiKey <key>` falha porque cria um objeto
+models.providers.openai.apiKey <key>` falha porque cria um objeto
 provider incompleto (sem baseUrl).
 
 ### Solucao (iteracao 1 - v2026.3.13)
@@ -32,20 +32,19 @@ const providerJson = JSON.stringify({ apiKey: key, baseUrl, models });
 await runCmd(OPENCLAW_NODE, clawArgs(["config", "set", "--json", cfgPath, providerJson]));
 ```
 
-Configuracao completa por provider:
-- Anthropic: baseUrl `https://api.anthropic.com`, models `["claude-sonnet-4-6", "claude-opus-4-6"]`
-- OpenAI: baseUrl `https://api.openai.com/v1`, models `["gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-4.1", "gpt-4.1-mini"]`
-- Google: baseUrl `https://generativelanguage.googleapis.com`, models `["gemini-3-pro-preview", "gemini-2.5-flash"]`
+Exemplos de configuracao completa (OpenAI e Google neste template):
+- **OpenAI:** `baseUrl` `https://api.openai.com/v1`, `models: [{ id: "gpt-5.4" }, { id: "gpt-4.1" }, ...]`
+- **Google:** `baseUrl` `https://generativelanguage.googleapis.com`, `models: [{ id: "gemini-3-pro-preview" }, { id: "gemini-2.5-flash" }]`
 
 ### Solucao (iteracao 3 - v2026.4.12 schema refinado)
 O campo `models` exige array de **objetos** com o identificador do modelo, nao strings:
 ```js
-// Errado: models: ["claude-sonnet-4-6"]
-// v2026.4.x: models: [{ name: "claude-sonnet-4-6" }]
+// Errado: models: ["gpt-5.4"]
+// v2026.4.x antigo: models: [{ name: "gpt-5.4" }]
 // Versao mais recente: models: [{ id: "gpt-5.4" }, ...]  (validacao pede `id`)
 ```
 
-**Licao:** O schema de `models.providers.<name>` muda entre versoes do OpenClaw.
+**Licao:** O schema de `models.providers.<name>` muda entre versoes do Openclaw.
 Sempre validar os campos obrigatorios nos logs apos atualizar a versao.
 Ver tambem: `fixes/openclaw-models-id-eacces-plugin-install.md` (id + EACCES em container).
 
@@ -77,16 +76,16 @@ Model "openai/gpt-5.4-mini" not found. Fell back to "google/gemini-2.0-flash-lit
 ```
 
 ### Causa raiz
-O OpenClaw v2026.3.13 nao possui os modelos GPT-5.4 no seu catalogo interno.
+O Openclaw v2026.3.13 nao possui os modelos GPT-5.4 no seu catalogo interno.
 Esses modelos foram lancados pela OpenAI em marco de 2026, mas o suporte
-depende da versao do OpenClaw (v2026.4.12+ provavelmente os inclui).
+depende da versao do Openclaw (v2026.4.12+ provavelmente os inclui).
 
 ### Solucao
 Removidos os modelos `openai/gpt-5.4`, `openai/gpt-5.4-mini` e
 `openai/gpt-5.4-nano` da lista de modelos e fallbacks. Mantidos apenas
 modelos compativeis com v2026.3.13 (gpt-4.1, gpt-4.1-mini).
 
-Para adicionar GPT-5.4 no futuro, atualizar o OpenClaw no Dockerfile:
+Para adicionar GPT-5.4 no futuro, atualizar o Openclaw no Dockerfile:
 ```dockerfile
 RUN npm install -g openclaw@latest
 ```

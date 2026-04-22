@@ -1,21 +1,21 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding assistants when working with code in this repository.
 
 ## Overview
 
 This is a Railway deployment wrapper for **OpenClaw** (an AI coding assistant platform). It provides:
 
 - A web-based setup wizard at `/setup` (protected by `SETUP_PASSWORD`)
-- Automatic reverse proxy from public URL → internal OpenClaw gateway
+- Automatic reverse proxy from public URL → internal Openclaw gateway
 - Persistent state via Railway Volume at `/data`
 
-The wrapper manages the OpenClaw lifecycle: onboarding → gateway startup → traffic proxying.
+The wrapper manages the Openclaw lifecycle: onboarding → gateway startup → traffic proxying.
 
 ## Development Commands
 
 ```bash
-# Local development (requires OpenClaw installed globally or OPENCLAW_ENTRY set)
+# Local development (requires Openclaw installed globally or OPENCLAW_ENTRY set)
 npm run dev
 
 # Production start
@@ -74,7 +74,7 @@ open http://localhost:8080/setup  # password: test
   - **setup.html**: Setup wizard HTML structure
   - **styles.css**: Setup wizard styling (extracted from inline styles)
   - **setup-app.js**: Client-side JS for `/setup` wizard (vanilla JS, no build step)
-- **Dockerfile**: Single-stage build (installs OpenClaw via npm, installs wrapper deps)
+- **Dockerfile**: Single-stage build (installs Openclaw via npm, installs wrapper deps)
 
 ### Environment Variables
 
@@ -110,7 +110,7 @@ When the user runs setup (src/server.js:522-693):
 4. Spawns gateway process
 5. Waits for gateway readiness (polls multiple endpoints)
 
-**Important**: Channel setup bypasses `openclaw channels add` and writes config directly because `channels add` is flaky across different OpenClaw builds.
+**Important**: Channel setup bypasses `openclaw channels add` and writes config directly because `channels add` is flaky across different Openclaw builds.
 
 ### Gateway Token Injection
 
@@ -163,7 +163,7 @@ Edit `buildOnboardArgs()` (src/server.js:442-496) to add new CLI flags or auth p
 - Template must mount a volume at `/data`
 - Must set `SETUP_PASSWORD` in Railway Variables
 - Public networking must be enabled (assigns `*.up.railway.app` domain)
-- OpenClaw is installed via `npm install -g openclaw@latest` during Docker build
+- Openclaw is installed via `npm install -g openclaw@latest` during Docker build
 
 ## Serena Semantic Coding
 
@@ -179,7 +179,7 @@ This project has been onboarded with **Serena** (semantic coding assistant via M
 1. Check `mcp__serena__check_onboarding_performed` first to see available memories
 2. Read relevant memory files before diving into code (e.g., `mcp__serena__read_memory`)
 3. Use Serena's semantic tools for efficient code exploration:
-   - `get_symbols_overview` - Get high-level file structure without reading entire file
+   - `get_symbols_overview` - Get high-level file structure without reading entire files
    - `find_symbol` - Find classes, functions, methods by name path
    - `find_referencing_symbols` - Understand dependencies and usage
 4. Prefer symbolic editing (`replace_symbol_body`, `insert_after_symbol`) for precise modifications
