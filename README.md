@@ -9,7 +9,7 @@ O **OpenClaw** e um assistente pessoal de IA open-source que roda nos seus propr
 | Componente | Tecnologia |
 |-----------|------------|
 | **Hospedagem** | Railway (PaaS) |
-| **IA Providers** | Anthropic (Claude Sonnet 4.6, Opus 4.6), Google (Gemini 3 Pro, 2.5 Flash), OpenAI (GPT-5.4, 5.4-mini, 5.4-nano, 4.1, 4.1-mini) |
+| **IA Providers** | **Modelo padrão:** Google Gemini 2.5 Flash; Google (Gemini 3 Pro, 2.5 Flash), OpenAI (GPT-5.4, 5.4-mini, 5.4-nano, 4.1, 4.1-mini) — sem Anthropic/Claude neste template |
 | **Canais** | WhatsApp + Web UI |
 | **IDE/Dev** | Cursor |
 | **Controle de versao** | GitHub |
@@ -281,7 +281,7 @@ No Setup Wizard:
 
 1. Em **"AI Provider"**, selecione **"Google"**
 2. Em **"API Key"**, cole a chave que voce gerou no Google AI Studio
-3. O modelo padrao sera o **Gemini** (o mais recente disponivel)
+3. O modelo padrao do template e **Google Gemini 2.5 Flash**
 4. Clique em **"Run Setup"**
 
 ### Obtendo a API Key do Google Gemini:

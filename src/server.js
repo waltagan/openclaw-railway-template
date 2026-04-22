@@ -430,14 +430,6 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       ],
     },
     {
-      value: "anthropic",
-      label: "Anthropic",
-      hint: "API key",
-      options: [
-        { value: "apiKey", label: "Anthropic API key" },
-      ],
-    },
-    {
       value: "google",
       label: "Google",
       hint: "API key",
@@ -504,7 +496,7 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
     {
       value: "synthetic",
       label: "Synthetic",
-      hint: "Anthropic-compatible (multi-model)",
+      hint: "API-compatible (multi-model)",
       options: [{ value: "synthetic-api-key", label: "Synthetic API key" }],
     },
     {
@@ -555,7 +547,6 @@ function buildOnboardArgs(payload) {
     const secret = (payload.authSecret || "").trim();
     const map = {
       "openai-api-key": "--openai-api-key",
-      apiKey: "--anthropic-api-key",
       "openrouter-api-key": "--openrouter-api-key",
       "ai-gateway-api-key": "--ai-gateway-api-key",
       "moonshot-api-key": "--moonshot-api-key",
@@ -603,7 +594,6 @@ function runCmd(cmd, args, opts = {}) {
 
 const VALID_AUTH_CHOICES = [
   "openai-api-key",
-  "apiKey",
   "gemini-api-key",
   "openrouter-api-key",
   "ai-gateway-api-key",
@@ -1223,23 +1213,19 @@ const server = app.listen(PORT, () => {
         ["config", "set", "--json", "agents.list", '[{"id":"main","default":true,"subagents":{"allowAgents":["*"]}}]'],
         ["config", "set", "--json", "approvals.exec", '{"enabled":false}'],
         ["config", "set", "--json", "agents.defaults.models", JSON.stringify({
-          "anthropic/claude-sonnet-4-6": {},
-          "anthropic/claude-opus-4-6": {},
-          "google/gemini-3-pro-preview": {},
           "google/gemini-2.5-flash": {},
+          "google/gemini-3-pro-preview": {},
           "openai/gpt-5.4": {},
           "openai/gpt-5.4-mini": {},
           "openai/gpt-5.4-nano": {},
           "openai/gpt-4.1": {},
           "openai/gpt-4.1-mini": {},
         })],
-        ["models", "set", "anthropic/claude-sonnet-4-6"],
-        ["models", "fallbacks", "add", "anthropic/claude-opus-4-6"],
+        ["models", "set", "google/gemini-2.5-flash"],
+        ["models", "fallbacks", "add", "google/gemini-3-pro-preview"],
         ["models", "fallbacks", "add", "openai/gpt-5.4"],
         ["models", "fallbacks", "add", "openai/gpt-5.4-mini"],
         ["models", "fallbacks", "add", "openai/gpt-5.4-nano"],
-        ["models", "fallbacks", "add", "google/gemini-3-pro-preview"],
-        ["models", "fallbacks", "add", "google/gemini-2.5-flash"],
         ["models", "fallbacks", "add", "openai/gpt-4.1"],
         ["models", "fallbacks", "add", "openai/gpt-4.1-mini"],
       ];
@@ -1253,12 +1239,6 @@ const server = app.listen(PORT, () => {
       // Inject provider API keys from environment variables
       // OpenClaw v2026.4.12 requires apiKey + baseUrl + models[{name}]
       const providerConfigs = [
-        {
-          env: "ANTHROPIC_API_KEY",
-          cfgPath: "models.providers.anthropic",
-          baseUrl: "https://api.anthropic.com",
-          models: [{ name: "claude-sonnet-4-6" }, { name: "claude-opus-4-6" }],
-        },
         {
           env: "OPENAI_API_KEY",
           cfgPath: "models.providers.openai",
