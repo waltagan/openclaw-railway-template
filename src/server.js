@@ -1237,22 +1237,25 @@ const server = app.listen(PORT, () => {
       }
 
       // Inject provider API keys from environment variables
-      // OpenClaw v2026.4.12 requires apiKey + baseUrl + models[{name}]
+      // Schema exige apiKey + baseUrl + models[{ id }] (id string; ver validacao do openclaw)
       const providerConfigs = [
         {
           env: "OPENAI_API_KEY",
           cfgPath: "models.providers.openai",
           baseUrl: "https://api.openai.com/v1",
           models: [
-            { name: "gpt-5.4" }, { name: "gpt-5.4-mini" }, { name: "gpt-5.4-nano" },
-            { name: "gpt-4.1" }, { name: "gpt-4.1-mini" },
+            { id: "gpt-5.4" },
+            { id: "gpt-5.4-mini" },
+            { id: "gpt-5.4-nano" },
+            { id: "gpt-4.1" },
+            { id: "gpt-4.1-mini" },
           ],
         },
         {
           env: "GOOGLE_API_KEY",
           cfgPath: "models.providers.google",
           baseUrl: "https://generativelanguage.googleapis.com",
-          models: [{ name: "gemini-3-pro-preview" }, { name: "gemini-2.5-flash" }],
+          models: [{ id: "gemini-3-pro-preview" }, { id: "gemini-2.5-flash" }],
         },
       ];
       for (const { env, cfgPath, baseUrl, models } of providerConfigs) {

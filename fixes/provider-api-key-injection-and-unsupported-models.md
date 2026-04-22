@@ -38,14 +38,16 @@ Configuracao completa por provider:
 - Google: baseUrl `https://generativelanguage.googleapis.com`, models `["gemini-3-pro-preview", "gemini-2.5-flash"]`
 
 ### Solucao (iteracao 3 - v2026.4.12 schema refinado)
-O campo `models` exige array de **objetos** `{name: string}`, nao strings:
+O campo `models` exige array de **objetos** com o identificador do modelo, nao strings:
 ```js
 // Errado: models: ["claude-sonnet-4-6"]
-// Certo:  models: [{ name: "claude-sonnet-4-6" }]
+// v2026.4.x: models: [{ name: "claude-sonnet-4-6" }]
+// Versao mais recente: models: [{ id: "gpt-5.4" }, ...]  (validacao pede `id`)
 ```
 
 **Licao:** O schema de `models.providers.<name>` muda entre versoes do OpenClaw.
 Sempre validar os campos obrigatorios nos logs apos atualizar a versao.
+Ver tambem: `fixes/openclaw-models-id-eacces-plugin-install.md` (id + EACCES em container).
 
 ## Problema 3: TUI token_mismatch
 
